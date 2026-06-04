@@ -101,8 +101,9 @@ class Aluno(Usuario):
         print("─" * 36)
 
 class Professor(Usuario):
-    def __init__(self, nome, titulacao, area, disciplinas, codigo=""):
+    def __init__(self, nome, cpf, titulacao, area, disciplinas, codigo=""):
         super().__init__(nome, "")
+        self._cpf = cpf
         self._titulacao = titulacao
         self._area = area
         self._disciplinas = disciplinas
@@ -129,6 +130,7 @@ class Professor(Usuario):
         print("=" * 36)
         print(f" Código : {self._codigo}")
         print(f" Nome : {self._nome}")
+        print(f"CPF: {self._cpf}")
         print(f" Titulação : {self._titulacao}")
         print(f" Área : {self._area}")
         discs = ", ".join(self._disciplinas) if self._disciplinas else "Nenhuma"
@@ -254,6 +256,7 @@ def buscar_professor_por_codigo(codigo):
     if d:
         return Professor(
             nome=d["nome"],
+            cpf=d.get("cpf", ""),
             titulacao=d["titulacao"],
             area=d["area"],
             disciplinas=d["disciplinas"],
@@ -381,6 +384,13 @@ def cadastrar_professor():
     if not nome:
         print("\n Cadastro cancelado.")
         return None
+    cpf = input("CPF: ").strip()
+    if not cpf:
+        print("\n Cadastro cancelado.")
+        return None
+    if banco_dados.professores.find_one({"cpf": cpf}):
+        print("\n [ERRO] Já existe um professor com esse CPF.")
+        return None
     titulacao = input(" Titulação (ex: Mestre): ").strip()
     area = input(" Área de atuação: ").strip()
     disc_input = input(" Disciplinas (separadas por vírgula): ").strip()
@@ -392,10 +402,11 @@ def cadastrar_professor():
         if d.strip():
             disciplinas.append(d.strip())
     codigo = gerar_codigo_professor()
-    professor = Professor(nome, titulacao, area, disciplinas, codigo)
+    professor = Professor(nome, cpf, titulacao, area, disciplinas, codigo)
     doc_professor = {
         "codigo": professor.get_codigo(),
         "nome": professor.get_nome(),
+        "cpf": professor.get_cpf(),
         "titulacao": professor.get_titulacao(),
         "area": professor.get_area(),
         "disciplinas": professor.get_disciplinas()

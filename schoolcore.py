@@ -2,6 +2,18 @@ from pymongo import MongoClient
 from pymongo.errors import ServerSelectionTimeoutError
 from datetime import datetime
 import random
+import os
+import time
+
+def animacao_carregando():
+    print("Carregando", end="")
+    for _ in range(3):
+        time.sleep(0.5)
+        print(".", end="", flush=True)
+    time.sleep(0.5)
+
+def limpar_tela():
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 class Banco:
     def __init__(self):
@@ -88,6 +100,8 @@ class Aluno(Usuario):
         self._status = valor.strip()
 
     def exibir_perfil(self):
+        animacao_carregando()
+        limpar_tela()
         print("\n" + "=" * 36)
         print(" PERFIL DO ALUNO".center(36))
         print("=" * 36)
@@ -99,6 +113,7 @@ class Aluno(Usuario):
         print(f" Período: {self._periodo}")
         print(f" Status: {self._status}")
         print("─" * 36)
+        limpar_tela()
 
 class Professor(Usuario):
     def __init__(self, nome, cpf, titulacao, area, disciplinas, codigo=""):
@@ -125,6 +140,8 @@ class Professor(Usuario):
         return self._disciplinas
 
     def exibir_perfil(self):
+        animacao_carregando()
+        limpar_tela()
         print("\n" + "=" * 36)
         print("  PERFIL DO PROFESSOR".center(36))
         print("=" * 36)
@@ -136,6 +153,7 @@ class Professor(Usuario):
         discs = ", ".join(self._disciplinas) if self._disciplinas else "Nenhuma"
         print(f" Disciplinas: {discs}")
         print("─" * 36)
+        limpar_tela()
 
 class Disciplina:
     def __init__(self, nome, carga_horaria, codigo=""):
@@ -336,6 +354,8 @@ def atualizar_turma_no_banco(turma_atualizada):
     )
 
 def cadastrar_aluno():
+    animacao_carregando()
+    limpar_tela()
     print("\n" + "=" * 36)
     print(" CADASTRO DE ALUNO".center(36))
     print("=" * 36)
@@ -371,12 +391,14 @@ def cadastrar_aluno():
     }
     banco_dados.alunos.insert_one(doc_aluno)
     print("\n" + "=" * 36)
-    print(" CADASTRO REALIZADO COM SUCESSO!  ".center(36))
+    print(" CADASTRO REALIZADO COM SUCESSO!".center(36))
     print("=" * 36)
     print(f"\n Sua matrícula (código de acesso): {matricula}")
     return matricula
 
 def cadastrar_professor():
+    animacao_carregando()
+    limpar_tela()
     print("\n" + "=" * 36)
     print(" CADASTRO DE PROFESSOR".center(36))
     print("=" * 36)
@@ -413,13 +435,15 @@ def cadastrar_professor():
     }
     banco_dados.professores.insert_one(doc_professor)
     print("\n" + "=" * 36)
-    print(" CADASTRO REALIZADO COM SUCESSO!  ".center(36))
+    print(" CADASTRO REALIZADO COM SUCESSO!".center(36))
     print("=" * 36)
     print(f"\n  Seu código de acesso: {codigo}")
     return codigo
 
 def menu_aluno(aluno):
     while True:
+        animacao_carregando()
+        limpar_tela()
         print("\n" + "=" * 36)
         print(f" Olá, {aluno.get_nome().split()[0]}!")
         print(f" Matrícula: {aluno.get_matricula()}")
@@ -428,7 +452,8 @@ def menu_aluno(aluno):
         print(" 2. Horário de aulas")
         print(" 3. Notas e faltas")
         print(" 4. Boletim")
-        print(" 5. Sair")
+        print(" 5. Excluir cadastro")
+        print(" 6. Sair")
         opcao = input("\n  Opção: ").strip()
         if opcao == "1":
             aluno.exibir_perfil()
@@ -439,12 +464,24 @@ def menu_aluno(aluno):
         elif opcao == "4":
             ver_boletim_aluno(aluno)
         elif opcao == "5":
+            certeza = input("Você tem certeza de que deseja excluir o seu cadastro? Essa ação é irreversível. (s = sim/n = não)\n-> ").strip().lower()
+            if certeza == 's':
+                banco_dados.alunos.delete_one({"matricula": aluno.get_matricula()})
+                print("Aluno removido com sucesso!")
+                break
+            elif certeza == 'n':
+                continue
+            else:
+                print("[ERRO] Digite uma opção válida.")
+        elif opcao == "6":
             print("\n  Até logo!")
             break
         else:
             print("\n  [ERRO] Opção inválida.")
 
 def ver_horario_aluno(matricula):
+    animacao_carregando()
+    limpar_tela()
     print("\n" + "=" * 36)
     print(" HORÁRIO DE AULAS".center(36))
     print("=" * 36)
@@ -459,6 +496,8 @@ def ver_horario_aluno(matricula):
         print("  ─────────────────────────────")
 
 def ver_notas_aluno(matricula):
+    animacao_carregando()
+    limpar_tela()
     print("\n" + "=" * 36)
     print(" NOTAS E FALTAS".center(36))
     print("=" * 36)
@@ -479,6 +518,8 @@ def ver_notas_aluno(matricula):
         print("  ─────────────────────────────")
 
 def ver_boletim_aluno(aluno):
+    animacao_carregando()
+    limpar_tela()
     print("\n" + "=" * 36)
     print("BOLETIM".center(36))
     print("=" * 36)
@@ -510,6 +551,8 @@ def ver_boletim_aluno(aluno):
 def menu_professor(professor):
     codigo = professor.get_codigo()
     while True:
+        animacao_carregando()
+        limpar_tela()
         print("\n" + "=" * 36)
         print(f" Prof. {professor.get_nome().split()[0]}")
         print(f" Código: {codigo}")
@@ -519,7 +562,8 @@ def menu_professor(professor):
         print(" 3. Listagem de turma")
         print(" 4. Controle de frequência e notas")
         print(" 5. Emitir boletim da turma")
-        print(" 6. Sair")
+        print(" 6. Excluir cadastro")
+        print(" 7. Sair")
         opcao = input("\n  Opção: ").strip()
         if opcao == "1":
             professor.exibir_perfil()
@@ -531,13 +575,25 @@ def menu_professor(professor):
             lancar_frequencia_notas(codigo)
         elif opcao == "5":
             emitir_boletim_turma(codigo)
-        elif opcao == "6":
+        elif opcao == '6':
+            certeza = input("Você tem certeza de que deseja excluir o seu cadastro? Essa ação é irreversível. (s = sim/n = não)\n-> ").strip().lower()
+            if certeza == 's':
+                banco_dados.professores.delete_one({"codigo": professor.get_codigo()})
+                print("Professor removido com sucesso!")
+                break
+            elif certeza == 'n':
+                continue
+            else:
+                print("[ERRO] Digite uma opção válida.")
+        elif opcao == "7":
             print("\n  Até logo!")
             break
         else:
             print("\n  [ERRO] Opção inválida.")
 
 def ver_disciplinas_professor(codigo_prof):
+    animacao_carregando()
+    limpar_tela()
     print("\n" + "=" * 36)
     print(" DISCIPLINAS E HORÁRIOS".center(36))
     print("=" * 36)
@@ -551,6 +607,8 @@ def ver_disciplinas_professor(codigo_prof):
         print("  ─────────────────────────────")
 
 def ver_turma_professor(codigo_prof):
+    animacao_carregando()
+    limpar_tela()
     print("\n" + "=" * 36)
     print(" LISTAGEM DE TURMA".center(36))
     print("=" * 36)
@@ -581,6 +639,8 @@ def ver_turma_professor(codigo_prof):
         print(f"  {i:<4} {mat:<16} {nome:<30}")
 
 def lancar_frequencia_notas(codigo_prof):
+    animacao_carregando()
+    limpar_tela()
     print("\n" + "=" * 36)
     print(" CONTROLE DE FREQUÊNCIA/NOTAS".center(36))
     print("=" * 36)
@@ -643,6 +703,8 @@ def lancar_frequencia_notas(codigo_prof):
         print(f"\n [ERRO] {e}")
 
 def emitir_boletim_turma(codigo_prof):
+    animacao_carregando()
+    limpar_tela()
     print("\n" + "=" * 36)
     print(" BOLETIM DA TURMA".center(36))
     print("=" * 36)
@@ -681,6 +743,8 @@ def emitir_boletim_turma(codigo_prof):
 
 def tela_entrada():
     while True:
+        animacao_carregando()
+        limpar_tela()
         print("\n" + "=" * 36)
         print(" SCHOOLCORE".center(36))
         print("=" * 36)
@@ -697,8 +761,11 @@ def tela_entrada():
             break
         else:
             print("\n [ERRO] Opção inválida. Escolha 1, 2 ou 3.")
+        limpar_tela()
 
 def fazer_login():
+    animacao_carregando()
+    limpar_tela()
     print("\n" + "=" * 36)
     print(" LOGIN".center(36))
     print("=" * 36)
@@ -710,19 +777,21 @@ def fazer_login():
         if not aluno:
             print("\n  [ERRO] Matrícula não encontrada.")
             return
-        print(f"\n  ✔ Bem-vindo(a), {aluno.get_nome()}!")
+        print(f"\n  Bem-vindo(a), {aluno.get_nome()}!")
         menu_aluno(aluno)
     elif codigo.startswith("PRO"):
         professor = buscar_professor_por_codigo(codigo)
         if not professor:
             print("\n  [ERRO] Código funcional não encontrado.")
             return
-        print(f"\n  ✔ Bem-vindo(a), Prof. {professor.get_nome()}!")
+        print(f"\n  Bem-vindo(a), Prof. {professor.get_nome()}!")
         menu_professor(professor)
     else:
         print("\n [ERRO] Código inválido.")
 
 def fazer_cadastro():
+    animacao_carregando()
+    limpar_tela()
     print("\n" + "=" * 36)
     print(" NOVO CADASTRO".center(36))
     print("=" * 36)
